@@ -1,15 +1,13 @@
 #!/usr/bin/env node
 
-const toWhite = (text) => `\x1b[37m${text}\x1b[0m`;
-
 for (let i = 1; i <= 20; i++) {
   if (i % 3 === 0 && i % 5 === 0) {
-    console.log(toWhite("FizzBuzz"));
+    console.log("FizzBuzz");
   } else if (i % 3 === 0) {
-    console.log(toWhite("Fizz"));
+    console.log("Fizz");
   } else if (i % 5 === 0) {
-    console.log(toWhite("Buzz"));
+    console.log("Buzz");
   } else {
-    console.log(toWhite(i));
+    console.log(String(i));
   }
 }

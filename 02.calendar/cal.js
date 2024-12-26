@@ -3,11 +3,6 @@
 import { parseArgs } from "node:util";
 import { stdout } from "node:process";
 
-const today = new Date();
-let year = today.getFullYear();
-let month = today.getMonth() + 1;
-const week = ["日", "月", "火", "水", "木", "金", "土"];
-
 const options = {
   m: { type: "string" },
   y: { type: "string" },
@@ -15,14 +10,15 @@ const options = {
 
 const { values } = parseArgs({ options });
 
-if (values.m) month = parseInt(values.m);
-if (values.y) year = parseInt(values.y);
+const today = new Date();
+const year = values.y ? parseInt(values.y) : today.getFullYear();
+const month = values.m ? parseInt(values.m) : today.getMonth() + 1;
 
 const firstDay = new Date(year, month - 1, 1);
 const lastDay = new Date(year, month, 0);
 
 console.log(`${month.toString().padStart(7)} 月 ${year}`);
-console.log(week.join(" "));
+console.log("日 月 火 水 木 金 土");
 
 stdout.write(" ".repeat(3 * firstDay.getDay()));
 

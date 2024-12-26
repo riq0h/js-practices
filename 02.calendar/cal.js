@@ -33,10 +33,12 @@ for (
     dayString = `\x1b[7m${dayString}\x1b[0m`;
   }
 
-  stdout.write(`${dayString} `);
+  stdout.write(dayString);
 
-  if (date.getDay() === 6) {
+  if (date.getDay() === 6 && date < lastDate) {
     console.log();
+  } else if (date < lastDate) {
+    stdout.write(" ");
   }
 }
 

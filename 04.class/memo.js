@@ -3,10 +3,14 @@ import readline from "readline";
 
 const memoManager = new MemoManager();
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
+function createReadlineInterface() {
+  return readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+}
+
+let rl = createReadlineInterface();
 
 async function main() {
   await memoManager.init();
@@ -30,7 +34,11 @@ async function main() {
     rl.question("表示したいメモの番号を選択してください: ", (answer) => {
       const index = parseInt(answer) - 1;
       const memo = memoManager.getMemo(index);
-      console.log(memo.content);
+      if (memo) {
+        console.log(memo.content);
+      } else {
+        console.log("指定されたメモが存在しません。");
+      }
       rl.close();
     });
   } else if (args[0] === "-d") {
@@ -47,6 +55,22 @@ async function main() {
         console.log("メモの削除に失敗しました。");
       }
       rl.close();
+    });
+  } else if (args[0] === "-e") {
+    const memos = memoManager.listMemos();
+    for (let i = 0; i < memos.length; i++) {
+      console.log(`${i + 1}. ${memos[i]}`);
+    }
+    rl.question("編集したいメモの番号を選択してください: ", async (answer) => {
+      const index = parseInt(answer) - 1;
+      rl.close();
+
+      const result = await memoManager.editMemo(index);
+      if (result) {
+        console.log("メモが編集されました。");
+      } else {
+        console.log("メモの編集に失敗しました。");
+      }
     });
   }
 }

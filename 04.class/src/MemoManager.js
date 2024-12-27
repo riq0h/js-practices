@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { spawn } from "child_process";
 
 export class MemoManager {
   constructor() {
@@ -35,7 +36,12 @@ export class MemoManager {
   getMemo(index) {
     return this.memos[index];
   }
+
   async deleteMemo(index) {
+    if (index < 0 || index >= this.memos.length) {
+      console.log("指定されたメモが存在しません。");
+      return false;
+    }
     const memo = this.memos[index];
     const files = await fs.readdir(this.dataDir);
     const fileName = files.find((file) => file.endsWith(`_${memo.title}.txt`));
@@ -43,6 +49,35 @@ export class MemoManager {
       await fs.unlink(path.join(this.dataDir, fileName));
       this.memos.splice(index, 1);
       return true;
+    } else {
+      console.log("メモファイルが見つかりません。");
+      return false;
+    }
+  }
+
+  async editMemo(index) {
+    if (index < 0 || index >= this.memos.length) {
+      console.log("指定されたメモが存在しません。");
+      return false;
+    }
+    const memo = this.memos[index];
+    const files = await fs.readdir(this.dataDir);
+    const fileName = files.find((file) => file.endsWith(`_${memo.title}.txt`));
+    if (fileName) {
+      const filePath = path.join(this.dataDir, fileName);
+      const editor = process.env.EDITOR || "vim";
+
+      return new Promise((resolve) => {
+        const child = spawn(editor, [filePath], {
+          stdio: "inherit",
+        });
+
+        child.on("exit", async () => {
+          const updatedContent = await fs.readFile(filePath, "utf-8");
+          memo.content = updatedContent;
+          resolve(true);
+        });
+      });
     } else {
       console.log("メモファイルが見つかりません。");
       return false;

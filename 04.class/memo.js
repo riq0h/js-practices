@@ -40,8 +40,12 @@ async function main() {
     }
     rl.question("削除したいメモの番号を選択してください: ", async (answer) => {
       const index = parseInt(answer) - 1;
-      await memoManager.deleteMemo(index);
-      console.log("メモが削除されました。");
+      const result = await memoManager.deleteMemo(index);
+      if (result) {
+        console.log("メモが削除されました。");
+      } else {
+        console.log("メモの削除に失敗しました。");
+      }
       rl.close();
     });
   }

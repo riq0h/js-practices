@@ -35,7 +35,6 @@ export class MemoManager {
   getMemo(index) {
     return this.memos[index];
   }
-
   async deleteMemo(index) {
     const memo = this.memos[index];
     const files = await fs.readdir(this.dataDir);
@@ -43,8 +42,10 @@ export class MemoManager {
     if (fileName) {
       await fs.unlink(path.join(this.dataDir, fileName));
       this.memos.splice(index, 1);
+      return true;
     } else {
-      throw new Error("メモファイルが見つかりません。");
+      console.log("メモファイルが見つかりません。");
+      return false;
     }
   }
 }

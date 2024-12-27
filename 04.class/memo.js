@@ -33,6 +33,17 @@ async function main() {
       console.log(memo.content);
       rl.close();
     });
+  } else if (args[0] === "-d") {
+    const memos = memoManager.listMemos();
+    for (let i = 0; i < memos.length; i++) {
+      console.log(`${i + 1}. ${memos[i]}`);
+    }
+    rl.question("削除したいメモの番号を選択してください: ", async (answer) => {
+      const index = parseInt(answer) - 1;
+      await memoManager.deleteMemo(index);
+      console.log("メモが削除されました。");
+      rl.close();
+    });
   }
 }
 

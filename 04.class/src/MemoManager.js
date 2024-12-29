@@ -13,20 +13,28 @@ export class MemoManager {
     const files = await fs.readdir(this.dataDir);
     for (const file of files) {
       const content = await fs.readFile(path.join(this.dataDir, file), "utf-8");
-      const title = file.substring(
-        file.indexOf("_") + 1,
-        file.lastIndexOf("."),
-      );
+      const title = this.extractTitleFromFileName(file);
       this.memos.push({ title, content });
     }
+  }
+
+  extractTitleFromFileName(fileName) {
+    return fileName.substring(
+      fileName.indexOf("_") + 1,
+      fileName.lastIndexOf("."),
+    );
   }
 
   async addMemo(content) {
     const lines = content.split("\n");
     const title = lines[0];
-    const fileName = `${Date.now()}_${title}.txt`;
+    const fileName = this.createFileName(title);
     await fs.writeFile(path.join(this.dataDir, fileName), content);
     this.memos.push({ title, content });
+  }
+
+  createFileName(title) {
+    return `${Date.now()}_${title}.txt`;
   }
 
   listMemos() {
@@ -38,49 +46,47 @@ export class MemoManager {
   }
 
   async deleteMemo(index) {
-    if (index < 0 || index >= this.memos.length) {
-      console.log("指定されたメモが存在しません。");
+    if (!this.isValidIndex(index)) {
       return false;
     }
     const memo = this.memos[index];
-    const files = await fs.readdir(this.dataDir);
-    const fileName = files.find((file) => file.endsWith(`_${memo.title}.txt`));
+    const fileName = await this.findFileNameByTitle(memo.title);
     if (fileName) {
       await fs.unlink(path.join(this.dataDir, fileName));
       this.memos.splice(index, 1);
       return true;
-    } else {
-      console.log("メモファイルが見つかりません。");
-      return false;
     }
+    return false;
   }
 
   async editMemo(index) {
-    if (index < 0 || index >= this.memos.length) {
-      console.log("指定されたメモが存在しません。");
+    if (!this.isValidIndex(index)) {
       return false;
     }
     const memo = this.memos[index];
-    const files = await fs.readdir(this.dataDir);
-    const fileName = files.find((file) => file.endsWith(`_${memo.title}.txt`));
+    const fileName = await this.findFileNameByTitle(memo.title);
     if (fileName) {
       const filePath = path.join(this.dataDir, fileName);
       const editor = process.env.EDITOR || "vim";
 
       return new Promise((resolve) => {
-        const child = spawn(editor, [filePath], {
-          stdio: "inherit",
-        });
-
+        const child = spawn(editor, [filePath], { stdio: "inherit" });
         child.on("exit", async () => {
           const updatedContent = await fs.readFile(filePath, "utf-8");
           memo.content = updatedContent;
           resolve(true);
         });
       });
-    } else {
-      console.log("メモファイルが見つかりません。");
-      return false;
     }
+    return false;
+  }
+
+  isValidIndex(index) {
+    return index >= 0 && index < this.memos.length;
+  }
+
+  async findFileNameByTitle(title) {
+    const files = await fs.readdir(this.dataDir);
+    return files.find((file) => file.endsWith(`_${title}.txt`));
   }
 }

@@ -35,9 +35,9 @@ for (
 
   stdout.write(dayString);
 
-  if (date < lastDate) {
-    stdout.write(date.getDay() === 6 ? "\n" : " ");
-  } else {
+  if (date.getDay() === 6 || date.getTime() === lastDate.getTime()) {
     console.log();
+  } else {
+    stdout.write(" ");
   }
 }

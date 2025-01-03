@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { spawn } from "child_process";
+import crypto from "crypto";
 
 export class MemoManager {
   constructor() {
@@ -13,12 +14,12 @@ export class MemoManager {
     const files = await fs.readdir(this.dataDir);
     for (const file of files) {
       const content = await fs.readFile(path.join(this.dataDir, file), "utf-8");
-      const title = this.extractTitleFromFileName(file);
+      const title = this.#extractTitleFromFileName(file);
       this.memos.push({ title, content });
     }
   }
 
-  extractTitleFromFileName(fileName) {
+  #extractTitleFromFileName(fileName) {
     return fileName.substring(
       fileName.indexOf("_") + 1,
       fileName.lastIndexOf("."),
@@ -28,29 +29,30 @@ export class MemoManager {
   async addMemo(content) {
     const lines = content.split("\n");
     const title = lines[0];
-    const fileName = this.createFileName(title);
+    const fileName = this.#createFileName(title);
     await fs.writeFile(path.join(this.dataDir, fileName), content);
-    this.memos.push({ title, content });
   }
 
-  createFileName(title) {
-    return `${Date.now()}_${title}.txt`;
+  #createFileName(title) {
+    const timestamp = Date.now();
+    const hash = crypto.createHash("md5").update(title).digest("hex");
+    return `${timestamp}_${hash}.txt`;
   }
 
-  listMemos() {
+  listMemoTitles() {
     return this.memos.map((memo) => memo.title);
   }
 
   getMemo(index) {
-    return this.memos[index];
+    return this.isValidIndex(index) ? this.memos[index] : null;
   }
 
   async deleteMemo(index) {
-    if (!this.isValidIndex(index)) {
+    const memo = this.getMemo(index);
+    if (!memo) {
       return false;
     }
-    const memo = this.memos[index];
-    const fileName = await this.findFileNameByTitle(memo.title);
+    const fileName = await this.#findFileNameByTitle(memo.title);
     if (fileName) {
       await fs.unlink(path.join(this.dataDir, fileName));
       this.memos.splice(index, 1);
@@ -60,11 +62,11 @@ export class MemoManager {
   }
 
   async editMemo(index) {
-    if (!this.isValidIndex(index)) {
+    const memo = this.getMemo(index);
+    if (!memo) {
       return false;
     }
-    const memo = this.memos[index];
-    const fileName = await this.findFileNameByTitle(memo.title);
+    const fileName = await this.#findFileNameByTitle(memo.title);
     if (fileName) {
       const filePath = path.join(this.dataDir, fileName);
       const editor = process.env.EDITOR || "vim";
@@ -85,8 +87,8 @@ export class MemoManager {
     return index >= 0 && index < this.memos.length;
   }
 
-  async findFileNameByTitle(title) {
+  async #findFileNameByTitle(title) {
     const files = await fs.readdir(this.dataDir);
-    return files.find((file) => file.endsWith(`_${title}.txt`));
+    return files.find((file) => this.#extractTitleFromFileName(file) === title);
   }
 }

@@ -1,7 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
 import { spawn } from "child_process";
-import crypto from "crypto";
 
 export class MemoManager {
   constructor() {
@@ -19,28 +18,19 @@ export class MemoManager {
     }
   }
 
-  #extractTitleFromFileName(fileName) {
-    return fileName.substring(
-      fileName.indexOf("_") + 1,
-      fileName.lastIndexOf("."),
-    );
-  }
-
   async addMemo(content) {
-    const lines = content.split("\n");
-    const title = lines[0];
-    const fileName = this.#createFileName(title);
+    const fileName = this.#createFileName();
     await fs.writeFile(path.join(this.dataDir, fileName), content);
-  }
-
-  #createFileName(title) {
-    const timestamp = Date.now();
-    const hash = crypto.createHash("md5").update(title).digest("hex");
-    return `${timestamp}_${hash}.txt`;
+    this.memos.push({ title: fileName, content });
   }
 
   listMemoTitles() {
-    return this.memos.map((memo) => memo.title);
+    return this.memos.map((memo) => {
+      const firstLine = memo.content.split("\n")[0];
+      return firstLine.length > 50
+        ? firstLine.substring(0, 47) + "..."
+        : firstLine;
+    });
   }
 
   getMemo(index) {
@@ -52,9 +42,9 @@ export class MemoManager {
     if (!memo) {
       return false;
     }
-    const fileName = await this.#findFileNameByTitle(memo.title);
-    if (fileName) {
-      await fs.unlink(path.join(this.dataDir, fileName));
+    const filePath = path.join(this.dataDir, memo.title);
+    if (await this.#fileExists(filePath)) {
+      await fs.unlink(filePath);
       this.memos.splice(index, 1);
       return true;
     }
@@ -66,29 +56,40 @@ export class MemoManager {
     if (!memo) {
       return false;
     }
-    const fileName = await this.#findFileNameByTitle(memo.title);
-    if (fileName) {
-      const filePath = path.join(this.dataDir, fileName);
-      const editor = process.env.EDITOR || "vim";
-
-      return new Promise((resolve) => {
-        const child = spawn(editor, [filePath], { stdio: "inherit" });
-        child.on("exit", async () => {
-          const updatedContent = await fs.readFile(filePath, "utf-8");
-          memo.content = updatedContent;
-          resolve(true);
-        });
-      });
+    const filePath = path.join(this.dataDir, memo.title);
+    if (!(await this.#fileExists(filePath))) {
+      return false;
     }
-    return false;
+    const editor = process.env.EDITOR || "vim";
+
+    return new Promise((resolve) => {
+      const child = spawn(editor, [filePath], { stdio: "inherit" });
+      child.on("exit", async () => {
+        const updatedContent = await fs.readFile(filePath, "utf-8");
+        memo.content = updatedContent;
+        resolve(true);
+      });
+    });
   }
 
   isValidIndex(index) {
     return index >= 0 && index < this.memos.length;
   }
 
-  async #findFileNameByTitle(title) {
-    const files = await fs.readdir(this.dataDir);
-    return files.find((file) => this.#extractTitleFromFileName(file) === title);
+  #createFileName() {
+    return `${Date.now()}.txt`;
+  }
+
+  #extractTitleFromFileName(fileName) {
+    return fileName;
+  }
+
+  async #fileExists(filePath) {
+    try {
+      await fs.access(filePath);
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

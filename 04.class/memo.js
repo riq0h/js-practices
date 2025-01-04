@@ -4,16 +4,8 @@ import readline from "readline";
 const memoManager = new MemoManager();
 
 async function main() {
-  try {
-    await initializeApp();
-    await processCommand(process.argv.slice(2));
-  } catch (error) {
-    console.error("エラーが発生しました:", error.message);
-  }
-}
-
-async function initializeApp() {
   await memoManager.init();
+  await processCommand(process.argv.slice(2));
 }
 
 async function processCommand(args) {
@@ -96,4 +88,7 @@ async function editMemo() {
   console.log(result ? "メモが編集されました。" : "メモの編集に失敗しました。");
 }
 
-main().catch(console.error);
+main().catch((error) => {
+  console.error("エラーが発生しました:", error);
+  process.exit(1);
+});

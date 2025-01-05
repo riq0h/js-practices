@@ -3,6 +3,8 @@ import readline from "readline";
 
 const memoManager = new MemoManager();
 
+main();
+
 async function main() {
   await memoManager.init();
   await processCommand(process.argv.slice(2));
@@ -31,8 +33,8 @@ async function processCommand(args) {
 }
 
 async function listMemos() {
-  const memoTitles = memoManager.listMemoTitles();
-  memoTitles.forEach((title, index) => {
+  const titles = memoManager.listMemoTitles();
+  titles.forEach((title, index) => {
     console.log(`${index + 1}. ${title}`);
   });
 }
@@ -87,8 +89,3 @@ async function editMemo() {
   const result = await memoManager.editMemo(index);
   console.log(result ? "メモが編集されました。" : "メモの編集に失敗しました。");
 }
-
-main().catch((error) => {
-  console.error("エラーが発生しました:", error);
-  process.exit(1);
-});

@@ -10,8 +10,8 @@ export class MemoManager {
 
   async init() {
     await fs.mkdir(this.dataDir, { recursive: true });
-    const files = await fs.readdir(this.dataDir);
-    for (const fileName of files) {
+    const fileNames = await fs.readdir(this.dataDir);
+    for (const fileName of fileNames) {
       const content = await fs.readFile(
         path.join(this.dataDir, fileName),
         "utf-8",
@@ -23,7 +23,6 @@ export class MemoManager {
   async addMemo(content) {
     const fileName = `${Date.now()}.txt`;
     await fs.writeFile(path.join(this.dataDir, fileName), content);
-    this.memos.push({ fileName, content });
   }
 
   listMemoTitles() {
@@ -35,23 +34,18 @@ export class MemoManager {
   }
 
   async deleteMemo(index) {
-    return this.#processMemo(index, async (filePath, memo) => {
+    return this.#processMemo(index, async (filePath) => {
       await fs.unlink(filePath);
-      this.memos.splice(this.memos.indexOf(memo), 1);
       return true;
     });
   }
 
   async editMemo(index) {
-    return this.#processMemo(index, (filePath, memo) => {
+    return this.#processMemo(index, (filePath) => {
       const editor = process.env.EDITOR || "vim";
       return new Promise((resolve) => {
         const child = spawn(editor, [filePath], { stdio: "inherit" });
-        child.on("exit", async () => {
-          const updatedContent = await fs.readFile(filePath, "utf-8");
-          memo.content = updatedContent;
-          resolve(true);
-        });
+        child.on("exit", () => resolve(true));
       });
     });
   }

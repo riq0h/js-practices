@@ -22,10 +22,10 @@ async function processCommand(args) {
       await displayMemo();
       break;
     case "-d":
-      await processMemoAction("削除");
+      await processMemoAction("削除", (index) => memoManager.deleteMemo(index));
       break;
     case "-e":
-      await processMemoAction("編集");
+      await processMemoAction("編集", (index) => memoManager.editMemo(index));
       break;
     default:
       console.log("無効なオプションです。");
@@ -74,14 +74,11 @@ async function displayMemo() {
   }
 }
 
-async function processMemoAction(action) {
+async function processMemoAction(action, callback) {
   const index = await promptMemoSelection(
     `${action}したいメモの番号を選択してください: `,
   );
-  const result =
-    action === "削除"
-      ? await memoManager.deleteMemo(index)
-      : await memoManager.editMemo(index);
+  const result = await callback(index);
   console.log(
     result ? `メモが${action}されました。` : `メモの${action}に失敗しました。`,
   );

@@ -36,8 +36,9 @@ try {
 
   await run(db, "DROP TABLE books");
   console.log("テーブルが削除されました");
+
+  await close(db);
 } catch (err) {
   console.error("予期せぬエラーが発生しました:", err.message);
-} finally {
   if (db) await close(db);
 }

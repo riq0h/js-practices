@@ -4,22 +4,14 @@ const dbError = new sqlite3.Database(":memory:");
 
 dbError.run(
   "CREATE TABLE books (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL UNIQUE)",
-  (err) => {
-    if (err) {
-      console.error("テーブル作成エラー:", err.message);
-      return;
-    }
+  () => {
     console.log("テーブルが作成されました");
 
     dbError.run(
       "INSERT INTO books (title) VALUES (?)",
       ["JavaScript入門"],
-      (err) => {
-        if (err) {
-          console.error("レコード追加エラー:", err.message);
-        } else {
-          console.log("最初のレコードが追加されました");
-        }
+      () => {
+        console.log("最初のレコードが追加されました");
 
         dbError.run(
           "INSERT INTO books (title) VALUES (?)",
@@ -34,12 +26,8 @@ dbError.run(
                 console.error("レコード取得エラー（意図的）:", err.message);
               }
 
-              dbError.run("DROP TABLE books", (err) => {
-                if (err) {
-                  console.error("テーブル削除エラー:", err.message);
-                } else {
-                  console.log("テーブルが削除されました");
-                }
+              dbError.run("DROP TABLE books", () => {
+                console.log("テーブルが削除されました");
                 dbError.close();
               });
             });

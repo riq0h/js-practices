@@ -10,20 +10,14 @@ openDatabase(":memory:")
       "CREATE TABLE books (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL UNIQUE)",
     );
   })
-  .then(() => {
-    console.log("テーブルが作成されました");
-    return run(db, "INSERT INTO books (title) VALUES (?)", ["JavaScript入門"]);
-  })
-  .then(({ lastID }) => {
-    console.log("追加されたレコードのID:", lastID);
-    return all(db, "SELECT * FROM books");
-  })
-  .then((rows) => {
-    console.log("取得したレコード:", rows);
-    return run(db, "DROP TABLE books");
-  })
-  .then(() => {
-    console.log("テーブルが削除されました");
-    return close(db);
-  })
+  .then(() => console.log("テーブルが作成されました"))
+  .then(() =>
+    run(db, "INSERT INTO books (title) VALUES (?)", ["JavaScript入門"]),
+  )
+  .then(({ lastID }) => console.log("追加されたレコードのID:", lastID))
+  .then(() => all(db, "SELECT * FROM books"))
+  .then((rows) => console.log("取得したレコード:", rows))
+  .then(() => run(db, "DROP TABLE books"))
+  .then(() => console.log("テーブルが削除されました"))
+  .then(() => close(db))
   .catch((err) => console.error("エラーが発生しました:", err.message));

@@ -10,14 +10,14 @@ openDatabase(":memory:")
       "CREATE TABLE books (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL UNIQUE)",
     );
   })
-  .then(() => {
-    console.log("テーブルが作成されました");
-    return run(db, "INSERT INTO books (title) VALUES (?)", ["JavaScript入門"]);
-  })
-  .then(() => {
-    console.log("最初のレコードが追加されました");
-    return run(db, "INSERT INTO books (title) VALUES (?)", ["JavaScript入門"]);
-  })
+  .then(() => console.log("テーブルが作成されました"))
+  .then(() =>
+    run(db, "INSERT INTO books (title) VALUES (?)", ["JavaScript入門"]),
+  )
+  .then(() => console.log("最初のレコードが追加されました"))
+  .then(() =>
+    run(db, "INSERT INTO books (title) VALUES (?)", ["JavaScript入門"]),
+  )
   .catch((err) => {
     if (err.message.includes("UNIQUE constraint failed")) {
       console.error("レコード追加エラー（意図的）:", err.message);
@@ -34,8 +34,6 @@ openDatabase(":memory:")
     }
   })
   .then(() => run(db, "DROP TABLE books"))
-  .then(() => {
-    console.log("テーブルが削除されました");
-    return close(db);
-  })
+  .then(() => console.log("テーブルが削除されました"))
+  .then(() => close(db))
   .catch((err) => console.error("予期せぬエラーが発生しました:", err.message));

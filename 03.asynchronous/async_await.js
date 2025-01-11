@@ -1,31 +1,28 @@
 import { openDatabase, run, all, close } from "./db_utils.js";
 
-async function main() {
-  let db;
-  try {
-    db = await openDatabase(":memory:");
+let db;
 
-    await run(
-      db,
-      "CREATE TABLE books (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL UNIQUE)",
-    );
-    console.log("テーブルが作成されました");
+try {
+  db = await openDatabase(":memory:");
 
-    const { lastID } = await run(db, "INSERT INTO books (title) VALUES (?)", [
-      "JavaScript入門",
-    ]);
-    console.log("追加されたレコードのID:", lastID);
+  await run(
+    db,
+    "CREATE TABLE books (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL UNIQUE)",
+  );
+  console.log("テーブルが作成されました");
 
-    const rows = await all(db, "SELECT * FROM books");
-    console.log("取得したレコード:", rows);
+  const { lastID } = await run(db, "INSERT INTO books (title) VALUES (?)", [
+    "JavaScript入門",
+  ]);
+  console.log("追加されたレコードのID:", lastID);
 
-    await run(db, "DROP TABLE books");
-    console.log("テーブルが削除されました");
-  } catch (err) {
-    console.error("エラーが発生しました:", err.message);
-  } finally {
-    if (db) await close(db);
-  }
+  const rows = await all(db, "SELECT * FROM books");
+  console.log("取得したレコード:", rows);
+
+  await run(db, "DROP TABLE books");
+  console.log("テーブルが削除されました");
+} catch (err) {
+  console.error("エラーが発生しました:", err.message);
+} finally {
+  if (db) await close(db);
 }
-
-main();

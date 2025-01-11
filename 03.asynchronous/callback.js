@@ -1,5 +1,4 @@
 import sqlite3 from "sqlite3";
-import timers from "timers/promises";
 
 const db = new sqlite3.Database(":memory:");
 
@@ -26,5 +25,3 @@ db.run(
     );
   },
 );
-
-await timers.setTimeout(100);

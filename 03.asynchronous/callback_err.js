@@ -17,12 +17,12 @@ dbError.run(
           "INSERT INTO books (title) VALUES (?)",
           ["JavaScript入門"],
           (err) => {
-            if (err) {
+            if (err && err.message.includes("UNIQUE constraint failed")) {
               console.error("レコード追加エラー（意図的）:", err.message);
             }
 
             dbError.all("SELECT * FROM non_existent_table", (err) => {
-              if (err) {
+              if (err && err.message.includes("no such table")) {
                 console.error("レコード取得エラー（意図的）:", err.message);
               }
 

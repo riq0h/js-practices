@@ -19,13 +19,21 @@ openDatabase(":memory:")
         ]);
       })
       .catch((err) => {
-        console.error("レコード追加エラー（意図的）:", err.message);
+        if (err.message.includes("UNIQUE constraint failed")) {
+          console.error("レコード追加エラー（意図的）:", err.message);
+        } else {
+          throw err;
+        }
       })
       .then(() => {
         return all(db, "SELECT * FROM non_existent_table");
       })
       .catch((err) => {
-        console.error("レコード取得エラー（意図的）:", err.message);
+        if (err.message.includes("no such table")) {
+          console.error("レコード取得エラー（意図的）:", err.message);
+        } else {
+          throw err;
+        }
       })
       .then(() => {
         return run(db, "DROP TABLE books");
@@ -35,6 +43,4 @@ openDatabase(":memory:")
         return close(db);
       });
   })
-  .catch((err) => {
-    console.error("予期せぬエラーが発生しました:", err.message);
-  });
+  .catch((err) => console.error("予期せぬエラーが発生しました:", err.message));

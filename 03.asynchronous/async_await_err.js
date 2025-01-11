@@ -17,13 +17,21 @@ async function main() {
     try {
       await run(db, "INSERT INTO books (title) VALUES (?)", ["JavaScript入門"]);
     } catch (err) {
-      console.error("レコード追加エラー（意図的）:", err.message);
+      if (err.message.includes("UNIQUE constraint failed")) {
+        console.error("レコード追加エラー（意図的）:", err.message);
+      } else {
+        throw err;
+      }
     }
 
     try {
       await all(db, "SELECT * FROM non_existent_table");
     } catch (err) {
-      console.error("レコード取得エラー（意図的）:", err.message);
+      if (err.message.includes("no such table")) {
+        console.error("レコード取得エラー（意図的）:", err.message);
+      } else {
+        throw err;
+      }
     }
 
     await run(db, "DROP TABLE books");

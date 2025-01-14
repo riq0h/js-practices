@@ -12,22 +12,20 @@ openDatabase(":memory:")
   })
   .then(() => {
     console.log("テーブルが作成されました");
+    return run(db, "INSERT INTO books (title) VALUES (?)", ["JavaScript入門"]);
   })
-  .then(() =>
-    run(db, "INSERT INTO books (title) VALUES (?)", ["JavaScript入門"]),
-  )
   .then(({ lastID }) => {
     console.log("追加されたレコードのID:", lastID);
+    return all(db, "SELECT * FROM books");
   })
-  .then(() => all(db, "SELECT * FROM books"))
   .then((rows) => {
     console.log("取得したレコード:", rows);
+    return run(db, "DROP TABLE books");
   })
-  .then(() => run(db, "DROP TABLE books"))
   .then(() => {
     console.log("テーブルが削除されました");
+    return close(db);
   })
-  .then(() => close(db))
   .catch((err) => {
     console.error("エラーが発生しました:", err.message);
   });

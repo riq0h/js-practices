@@ -25,7 +25,4 @@ openDatabase(":memory:")
   .then(() => {
     console.log("テーブルが削除されました");
     return close(db);
-  })
-  .catch((err) => {
-    console.error("エラーが発生しました:", err.message);
   });

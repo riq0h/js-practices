@@ -3,8 +3,8 @@ import { openDatabase, run, all, close } from "./db_utils.js";
 let db;
 
 openDatabase(":memory:")
-  .then((database) => {
-    db = database;
+  .then((openedDb) => {
+    db = openedDb;
     return run(
       db,
       "CREATE TABLE books (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL UNIQUE)",
